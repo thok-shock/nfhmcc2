@@ -1,26 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import HDQA from './HDQA/HDQA.js'
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-} from "react-router-dom"
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Data from './Data/Data.js';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import LandingPage from './Landing/LandingPage';
+
     ReactDOM.render(
         <div>
         <Router>
             <Switch>
-                <Route path='/hdqa'>
-                    <HDQA />
+                <Route path='/' exact>
+                    <LandingPage></LandingPage>
                 </Route>
-                <Route path='/data'>
-                    <Data />
-                </Route>
-                <Route path='/'>
-                    <p>this is a path</p>
+                <Route path='/internal'>
+                    <p>this is the internal home page</p>
                 </Route>
             </Switch>
         </Router>

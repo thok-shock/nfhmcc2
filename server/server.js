@@ -5,7 +5,6 @@ const config = require("../webpack.config.js")
 const middleware = require('webpack-dev-middleware')
 const compiler = webpack(config)
 const path = require('path')
-const APIRouter = require("./api/api.js")
 const rootPath = path.resolve(__dirname, '..');
 
 const app = express()
@@ -27,6 +26,10 @@ app.get('/', (req, res) => {
     res.sendFile(rootPath + '/src/index.html')
 })
 
+app.get('/internal', (req, res) => {
+    res.sendFile(rootPath + '/src/index.html')
+})
+
 app.get("/main.bundle.js", (req, res) => {
     console.log('returning bundle')
     res.sendFile(rootPath + "/src/main.bundle.js");
@@ -43,8 +46,6 @@ app.get('/data', (req, res) => {
 app.get('/public/:path', (req, res) => {
     res.sendFile(rootPath + '/public/' + req.params.path)
 })
-
-app.use('/api', APIRouter)
 
 app.listen(3000, () => {
     console.log('Running on port 3000')
