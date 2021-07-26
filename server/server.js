@@ -6,7 +6,17 @@ const middleware = require('webpack-dev-middleware')
 const compiler = webpack(config)
 const path = require('path')
 const rootPath = path.resolve(__dirname, '..');
+const GoogleStrategy = require('passport-google-oauth20')
+const passport = require('passport')
+const {test} = require('./authFunctions')
 
+/**
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/login/google/callback"
+}))
+ */
 const app = express()
 
 app.use(express.urlencoded({extended: true}))
@@ -28,6 +38,18 @@ app.get('/', (req, res) => {
 
 app.get('/internal', (req, res) => {
     res.sendFile(rootPath + '/src/index.html')
+})
+
+app.get('/dbtest', (req, res) => {
+    test()
+    .then(success => {
+        console.log(success)
+        res.send(success)
+    })
+    .catch(err => {
+        console.log(err)
+        res.send(err)
+    })
 })
 
 app.get("/main.bundle.js", (req, res) => {
