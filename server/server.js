@@ -8,19 +8,51 @@ const path = require('path')
 const rootPath = path.resolve(__dirname, '..');
 const GoogleStrategy = require('passport-google-oauth20')
 const passport = require('passport')
-const {test} = require('./authFunctions')
+const {test, findUserByGoogleID, createUserFromGoogleProfile} = require('./authFunctions')
+const session = require('express-session')
+const loginRouter = require("./loginRouter.js")
 
-/**
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/login/google/callback"
+}, function(accessToken, refreshToken, profile, cb) {
+    findUserByGoogleID(profile.id)
+    .then(row => {
+        if(row && row[0]) {
+            return cb(null, row[0])
+        } else {
+            createUserFromGoogleProfile(profile)
+            .then(newUser => {
+                return cb(null, newUser[0])
+            })
+        }
+    })
+    .catch(err => {
+        return cb(err, null)
+    })
 }))
- */
+ 
 const app = express()
 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({}))
+
+app.use(
+    session({secret: 'test', saveUninitialized: false, resave: false})
+)
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.serializeUser(function(user, done) {
+    done(null, user)
+})
+
+passport.deserializeUser(function(user, done) {
+    done(null, user)
+})
 
 if (process.env.ENVIRONMENT === 'dev') {
     console.log('Compiling in Development Environment')
@@ -32,12 +64,30 @@ if (process.env.ENVIRONMENT === 'dev') {
     console.log('Running in Production Mode')
 }
 
+app.use('/login', loginRouter)
+
 app.get('/', (req, res) => {
     res.sendFile(rootPath + '/src/index.html')
 })
 
 app.get('/internal', (req, res) => {
-    res.sendFile(rootPath + '/src/index.html')
+    if (req.user) {
+      res.sendFile(rootPath + "/src/index.html");
+    } else {
+    req.session.redirectTo = req.url
+      res.redirect("/login/google");
+    }
+})
+
+app.get('/internal/*', (req, res) => {
+    if (req.user) {
+        res.sendFile(rootPath + "/src/index.html");
+      } else {
+          //console.log(req.url)
+          //save the original request url so that we can redirect the user after auth
+      req.session.redirectTo = req.url
+        res.redirect("/login/google");
+      }
 })
 
 app.get('/dbtest', (req, res) => {
@@ -68,6 +118,8 @@ app.get('/data', (req, res) => {
 app.get('/public/:path', (req, res) => {
     res.sendFile(rootPath + '/public/' + req.params.path)
 })
+
+
 
 app.listen(3000, () => {
     console.log('Running on port 3000')

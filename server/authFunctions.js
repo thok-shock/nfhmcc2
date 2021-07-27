@@ -12,7 +12,7 @@ function test() {
 function findUserByGoogleID(id) {
     return new Promise((resolve, reject) => {
         db.query({
-            sql: 'SELECT FROM users WHERE googleID = ?',
+            sql: 'SELECT * FROM users WHERE googleID = ?;',
             values: [id]
         }, function(err, row) {
             err ? reject(err) : resolve(row)
@@ -28,7 +28,7 @@ function createUserFromGoogleProfile(profile) {
             values: [profile.id, profile.name.givenName, profile.name.familyName, profile.photos[0].value]
         }, function(err, row) {
             err ? reject(err) : db.query({
-                sql: 'SELECT * FROM users WHERE user.userID = ?',
+                sql: 'SELECT * FROM users WHERE userID = ?',
                 values: [row.insertId]
             }, function(err, row) {
                 err ? reject(err) : resolve(row)

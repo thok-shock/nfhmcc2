@@ -1,0 +1,10 @@
+.sidebar-link {
+    cursor: pointer;
+    transition:ease-in;
+    transition-duration: 0.2s;
+}
+
+.sidebar-link:hover {
+    background-color: gray;
+    
+}

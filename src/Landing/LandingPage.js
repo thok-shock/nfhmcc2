@@ -1,7 +1,11 @@
 import React from "react";
 import { Col, Container, Row, Card, Button } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
 
 export default function LandingPage(props) {
+
+    let history = useHistory()
+
   return (
     <div>
       <Container fluid>
@@ -51,7 +55,7 @@ export default function LandingPage(props) {
               <p className="mx-3" style={{ padding: ".375rem .75rem" }}>
                 Current Inventory
               </p>
-              <Button className="mx-3">Login / Register</Button>
+              <Button className="mx-3" onClick={() => {console.log('clicked'); history.push('/internal')}}>Login / Register</Button>
             </div>
           </Col>
         </Row>
