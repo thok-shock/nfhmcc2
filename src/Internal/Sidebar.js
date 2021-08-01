@@ -4,7 +4,7 @@ import { Container, Row, Col } from 'react-bootstrap'
 import SidebarLink from './SidebarLink'
 
 export default function Sidebar(props) {
-    return <Container fluid className='text-light text-left p-0' style={{margin: '0px !important'}}>
+    return <Container fluid className='text-light text-left p-0 sticky' style={{margin: '0px !important'}}>
         <Row>
             <Col className='m-0'>
                 <img src='/public/Hahn2-white.png' width='100%' className='my-2'></img>
@@ -15,6 +15,8 @@ export default function Sidebar(props) {
                 <SidebarLink location='/internal/subscription'><i className="bi bi-credit-card"></i> Subscription</SidebarLink>
                 <hr style={{backgroundColor: 'white'}}></hr>
                 <SidebarLink location='/internal/inventory'><i className="bi bi-file-earmark-bar-graph"></i> Inventory</SidebarLink>
+                <SidebarLink location='/internal/inventory'><i class="bi bi-newspaper"></i> News</SidebarLink>
+                <SidebarLink location='/internal/inventory'><i class="bi bi-people"></i> Members</SidebarLink>
             </Col>
         </Row>
     </Container>
