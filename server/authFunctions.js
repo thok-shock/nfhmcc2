@@ -1,4 +1,6 @@
 const {db} = require('./sql')
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
+
 
 function test() {
     return new Promise((resolve, reject) => {
@@ -37,4 +39,45 @@ function createUserFromGoogleProfile(profile) {
     })
 }
 
-module.exports = {test, findUserByGoogleID, createUserFromGoogleProfile}
+function checkForStripeCustomer(user) {
+    return new Promise((resolve, reject) => {
+        if (user && user.stripeID == null) {
+            createStripeCustomer(user.email)
+            .then(customer => {
+                //console.log(customer)
+                db.query({
+                    sql: 'UPDATE users SET stripeID = ? WHERE userID = ?;',
+                    values: [customer.id, user.userID]
+                }, function(err, row) {
+                    if (err) {console.log(err); reject(err)}
+                    else {
+                        db.query({
+                            sql: 'SELECT * FROM users WHERE userID = ?',
+                            values: [user.userID]
+                        }, function(err, row) {
+                            if (err) {console.log(err); reject(err)}
+                            else {resolve(row)}
+                        })
+                    }
+                })
+            })
+        } else {
+            resolve(user)
+        }
+    })
+}
+
+function createStripeCustomer(email) {
+    return new Promise((resolve, reject) => {
+        stripe.customers.create({
+            email: email
+        }).then(customer => {
+            resolve(customer)
+        }).catch(err => {
+            console.log(err);
+            reject(err)
+        })
+    })
+}
+
+module.exports = {test, findUserByGoogleID, createUserFromGoogleProfile, checkForStripeCustomer}

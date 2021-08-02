@@ -8,7 +8,7 @@ const path = require('path')
 const rootPath = path.resolve(__dirname, '..');
 const GoogleStrategy = require('passport-google-oauth20')
 const passport = require('passport')
-const {test, findUserByGoogleID, createUserFromGoogleProfile} = require('./authFunctions')
+const {test, findUserByGoogleID, createUserFromGoogleProfile, checkForStripeCustomer} = require('./authFunctions')
 const session = require('express-session')
 const loginRouter = require("./loginRouter.js")
 
@@ -21,7 +21,14 @@ passport.use(new GoogleStrategy({
     findUserByGoogleID(profile.id)
     .then(row => {
         if(row && row[0]) {
-            return cb(null, row[0])
+            checkForStripeCustomer(row[0])
+            .then(user => {
+                return cb(null, user)
+            })
+            .catch(err => {
+                console.log(err)
+                return cb(err, null)
+            })
         } else {
             createUserFromGoogleProfile(profile)
             .then(newUser => {
@@ -119,7 +126,10 @@ app.get('/public/:path', (req, res) => {
     res.sendFile(rootPath + '/public/' + req.params.path)
 })
 
-
+app.get('/logout', (req, res) => {
+    req.logOut()
+    res.redirect('/')
+})
 
 app.listen(3000, () => {
     console.log('Running on port 3000')
