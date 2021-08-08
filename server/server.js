@@ -11,6 +11,7 @@ const passport = require('passport')
 const {test, findUserByGoogleID, createUserFromGoogleProfile, checkForStripeCustomer} = require('./authFunctions')
 const session = require('express-session')
 const loginRouter = require("./loginRouter.js")
+const apiRouter = require("./api/api.js")
 
 
 passport.use(new GoogleStrategy({
@@ -76,6 +77,8 @@ app.use('/login', loginRouter)
 app.get('/', (req, res) => {
     res.sendFile(rootPath + '/src/index.html')
 })
+
+app.use('/api', apiRouter)
 
 app.get('/internal', (req, res) => {
     if (req.user) {
