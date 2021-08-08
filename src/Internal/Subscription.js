@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { Col, Row, Container, Card, Table, Button, Modal } from 'react-bootstrap'
+import SubscriptionModal from './SubscriptionModal'
+import {Elements} from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js';
+
+let stripePromise = loadStripe('pk_test_KLM6Q0w4hf9hz3orcAsdQL9L00ZbKbbhcB')
 
 export default function Subscription(props) {
 
+    
     const [user, updateUser] = useState([])
     const [showSubModal, updateShowSubModal] = useState(false)
+    const [modalStage, updateModalStage] = useState('subscription')
     
     useEffect(() => {
         fetch('/api/user?type=self')
@@ -22,7 +29,26 @@ export default function Subscription(props) {
         }
     }, [user])
 
-    return <div><Container>
+    useEffect(() => {
+        if (user) {
+            if (user.subscriptionID) {
+                updateModalStage('payment')
+            }
+        }
+    })
+
+    function subscribe(tier) {
+        fetch('/api/stripe/create-subscription', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                priceID: tier,
+                customerID: user.stripeID
+            })
+        })
+    }
+
+    return <div><Elements stripe={stripePromise}><Container>
         <h3 className='my-3'>Subscription</h3>
         <Row>
             <Col>
@@ -100,28 +126,7 @@ export default function Subscription(props) {
             </Col>
         </Row>
     </Container>
-    <Modal show={showSubModal}>
-        <Modal.Header>
-            <Modal.Title>Welcome</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-            <p>We're happy that you are considering a NFHMCC subscription! To continue, please select the type of subscription you would like.</p>
-            <div className='d-flex flex-column'>
-                <div className='my-3'>
-                    <h4>Regular Subscription</h4>
-                    <p className='text-muted'>$5.00/month</p>
-                    <p>The regular subscription is our standard tier, which includes all of the tea and coffee products you could ever want.</p>
-
-            <Button className='w-100'>Regular</Button>
-            </div>
-            <div className='my-3'>
-            <h4>Premium Subscription</h4>
-            <p className='text-muted'>$10.00/month</p>
-                    <p>The premium sandwich includes everything from our regular subscription, but includes frozen food options as well.</p>
-            <Button className='w-100'>Premium</Button>
-            </div>
-            </div>
-        </Modal.Body>
-    </Modal>
+    <SubscriptionModal showSubModal={showSubModal} modalStage={modalStage} subscribe={subscribe} />
+    </Elements>
     </div>
 }
