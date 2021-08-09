@@ -1,8 +1,49 @@
-import { CardElement } from "@stripe/react-stripe-js";
-import React from "react";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Col } from "react-bootstrap";
 
+
+
+
+
 export default function SubscriptionModal(props) {
+
+const [clientSecret, updateClientSecret] = useState(null)
+const elements = useElements()
+const stripe = useStripe()
+
+useEffect(() => {
+  if (props.modalStage == 'payment') {
+    fetch('/api/stripe/get-latest-secret')
+    .then(res => {
+      return res.json()
+    })
+    .then(res => {
+      updateClientSecret(res.client_secret)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
+}, [props.modalStage])
+
+function subscribe(price) {
+  props.subscribe(price)
+}
+
+function confirmPayment(clientSecret, cardElement, fname, lname) {
+  return new Promise((resolve, reject) => {
+    stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: cardElement,
+        billing_details: {
+          name: fname + ' ' + lname,
+        },
+      }
+    })
+  })
+}
+
   if (props.modalStage == "subscription") {
     return (
       <Modal show={props.showSubModal}>
@@ -153,7 +194,10 @@ export default function SubscriptionModal(props) {
             <p className="mx-auto mt-2">
               By paying, you agree to the above terms and conditions
             </p>
-            <Button className="mx-auto px-5" variant="dark">
+            <Button className="mx-auto px-5" variant="dark" onClick={() => {
+              const cardElement = elements.getElement(CardElement)
+              confirmPayment(props.user.paymentSecret, cardElement)
+              }}>
               Pay $5.00
             </Button>
           </div>

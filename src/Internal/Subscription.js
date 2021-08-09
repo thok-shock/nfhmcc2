@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Col, Row, Container, Card, Table, Button, Modal } from 'react-bootstrap'
+import { Col, Row, Container, Card, Table, Button, Modal, Spinner } from 'react-bootstrap'
 import SubscriptionModal from './SubscriptionModal'
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
@@ -46,9 +46,18 @@ export default function Subscription(props) {
                 customerID: user.stripeID
             })
         })
+        .then(res => {
+            return res.json()
+        })
+        .then(res => {
+            const newUser = JSON.parse(JSON.stringify(user))
+            newUser.subscriptionID = res.subscriptionID
+            newUser.paymentSecret = res.client_secret
+            updateUser(newUser)
+        })
     }
 
-    return <div><Elements stripe={stripePromise}><Container>
+    if (user) {return <div><Elements stripe={stripePromise}><Container>
         <h3 className='my-3'>Subscription</h3>
         <Row>
             <Col>
@@ -126,7 +135,7 @@ export default function Subscription(props) {
             </Col>
         </Row>
     </Container>
-    <SubscriptionModal showSubModal={showSubModal} modalStage={modalStage} subscribe={subscribe} />
+    <SubscriptionModal showSubModal={showSubModal} modalStage={modalStage} subscribe={subscribe} user={user}/>
     </Elements>
-    </div>
+    </div>} else return <Spinner></Spinner>
 }
