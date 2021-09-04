@@ -12,6 +12,7 @@ const {test, findUserByGoogleID, createUserFromGoogleProfile, checkForStripeCust
 const session = require('express-session')
 const loginRouter = require("./loginRouter.js")
 const apiRouter = require("./api/api.js")
+const webhookRouter = require("./webhook.js")
 
 
 passport.use(new GoogleStrategy({
@@ -22,6 +23,7 @@ passport.use(new GoogleStrategy({
     findUserByGoogleID(profile.id)
     .then(row => {
         if(row && row[0]) {
+            console.log('checking for stripe customer')
             checkForStripeCustomer(row[0])
             .then(user => {
                 return cb(null, user)
@@ -62,6 +64,7 @@ passport.deserializeUser(function(user, done) {
     done(null, user)
 })
 
+//determines compiling environment. if in dev, will hot render, otherwise will serve the file
 if (process.env.ENVIRONMENT === 'dev') {
     console.log('Compiling in Development Environment')
     app.use(middleware(compiler, {
@@ -78,10 +81,16 @@ app.get('/', (req, res) => {
     res.sendFile(rootPath + '/src/index.html')
 })
 
+//pass api requests
 app.use('/api', apiRouter)
 
+//pass webhook requests (these are received from Stripe)
+app.use('/webhook', webhookRouter)
+
+//all internal requests must be authenticated
 app.get('/internal', (req, res) => {
     if (req.user) {
+        //console.log(req.user)
       res.sendFile(rootPath + "/src/index.html");
     } else {
     req.session.redirectTo = req.url
@@ -89,11 +98,12 @@ app.get('/internal', (req, res) => {
     }
 })
 
+//all internal requests must be authenticated
 app.get('/internal/*', (req, res) => {
     if (req.user) {
         res.sendFile(rootPath + "/src/index.html");
       } else {
-          //console.log(req.url)
+          //console.log(req.url)s
           //save the original request url so that we can redirect the user after auth
       req.session.redirectTo = req.url
         res.redirect("/login/google");

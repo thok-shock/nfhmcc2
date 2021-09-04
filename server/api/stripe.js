@@ -80,6 +80,7 @@ function storePaymentSecret(secret, customerID) {
 stripeRouter.post("/create-subscription", (req, res) => {
   const customerID = req.body.customerID;
   const priceID = req.body.priceID;
+  //console.log(req.body)
   createSubscription(customerID, priceID)
     .then((subscription) => {
       storeSubscriptionID(customerID, subscription.id).then((row) => {
@@ -107,7 +108,7 @@ stripeRouter.post("/create-subscription", (req, res) => {
 stripeRouter.get("/get-latest-secret", (req, res) => {
   console.log(req.session.passport.user.subscriptionID);
   getPIClientSecret(req.session.passport.user.stripeID).then((sub) => {
-    console.log(sub);
+    //console.log(sub);
     res.json(sub);
   });
 });

@@ -19,6 +19,7 @@ export default function Subscription(props) {
             return res.json()
         })
         .then(res => {
+            //console.log(res.passport.user)
             updateUser(res.passport.user)
         })
     }, [])
@@ -38,12 +39,13 @@ export default function Subscription(props) {
     })
 
     function subscribe(tier) {
+        //console.log(user)
         fetch('/api/stripe/create-subscription', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                priceID: tier,
-                customerID: user.stripeID
+                'priceID': tier,
+                'customerID': user.stripeID
             })
         })
         .then(res => {

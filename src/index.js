@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './index.css'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import LandingPage from './Landing/LandingPage';
 import InternalRouter from './Internal/InternalRouter';
 

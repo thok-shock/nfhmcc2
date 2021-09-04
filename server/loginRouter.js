@@ -24,8 +24,12 @@ googleLoginRouter.get(
   "/callback",
   passport.authenticate("google", { failureRedirect: "/", failureFlash: true }),
   function (req, res) { 
+    if (req.session.redirectTo == null) {
+      res.redirect('/internal')
+    } else {
     res.redirect(req.session.redirectTo);
     req.session.redirectTo = null
+    }
   }
 );
 

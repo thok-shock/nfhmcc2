@@ -1,6 +1,6 @@
-import React from 'react'
-import { Container, Row, Col } from 'react-bootstrap';
-import { BrowserRouter as Router, Switch, Route, BrowserRouter, useRouteMatch } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { BrowserRouter as Router, Switch, Route, BrowserRouter, useRouteMatch, Redirect } from 'react-router-dom';
 import Homepage from './Homepage';
 import Profile from './Profile';
 import Sidebar from './Sidebar';
@@ -10,8 +10,27 @@ import User from './User';
 
 export default function InternalRouter(props) {
 
+    const [status, updateStatus] = useState('loading')
+
+    useEffect(() => {
+        fetch('/api/user?type=self')
+        .then(res => res.json())
+        .then(res => {
+            if (res.passport && res.passport.user) {
+            updateStatus('loaded')
+            } else {
+                updateStatus('redirect')
+            }
+        })
+    }, [])
+
     let {path, url} = useRouteMatch();
 
+    if (status == 'loading') {
+        return <Spinner animation='border'></Spinner>
+    } else if (status == 'redirect') {
+        window.location = '/login/google'
+    } else if (status == 'loaded') {
     return <div>
         <span className='fixed-bottom m-3 text-muted'><small>© Ryan S Werner - v0.1</small></span>
         <Container fluid style={{minHeight: '100vh'}}>
@@ -43,4 +62,5 @@ export default function InternalRouter(props) {
         
         
     </div>
+    }
 }

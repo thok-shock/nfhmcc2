@@ -41,7 +41,7 @@ function createUserFromGoogleProfile(profile) {
 
 function checkForStripeCustomer(user) {
     return new Promise((resolve, reject) => {
-        if (user && user.stripeID == null) {
+        if (user && user.stripeID == null || user && user.stripeID == '') {
             createStripeCustomer(user.email)
             .then(customer => {
                 //console.log(customer)
