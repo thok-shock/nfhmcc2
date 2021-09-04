@@ -31,7 +31,8 @@ function subscribe(price) {
   props.subscribe(price)
 }
 
-function confirmPayment(clientSecret, cardElement, fname, lname) {
+function createStripePayment(clientSecret, cardElement, fname, lname) {
+  console.log(clientSecret)
   return new Promise((resolve, reject) => {
     stripe.confirmCardPayment(clientSecret, {
       payment_method: {
@@ -40,6 +41,21 @@ function confirmPayment(clientSecret, cardElement, fname, lname) {
           name: fname + ' ' + lname,
         },
       }
+    })
+    .then(card => {resolve(card)})
+    .catch(err => {reject(err)})
+  })
+  
+}
+
+function confirmPayment(clientSecret, cardElement, fname, lname) {
+  return new Promise((resolve, reject) => {
+    createStripePayment(clientSecret, cardElement, fname, lname)
+    .then(card => {
+      console.log(card)
+    })
+    .catch(err => {
+      console.log(err)
     })
   })
 }
@@ -124,11 +140,11 @@ function confirmPayment(clientSecret, cardElement, fname, lname) {
 
           <Form.Row className="m-1">
             <Form.Group as={Col}>
-              <Form.Label>First Name</Form.Label>
+              <Form.Label id='fname'>First Name</Form.Label>
               <Form.Control name="fname"></Form.Control>
             </Form.Group>
             <Form.Group as={Col}>
-              <Form.Label>Last Name</Form.Label>
+              <Form.Label id='lname'>Last Name</Form.Label>
               <Form.Control name="lname"></Form.Control>
             </Form.Group>
           </Form.Row>
@@ -196,7 +212,7 @@ function confirmPayment(clientSecret, cardElement, fname, lname) {
             </p>
             <Button className="mx-auto px-5" variant="dark" onClick={() => {
               const cardElement = elements.getElement(CardElement)
-              confirmPayment(props.user.paymentSecret, cardElement)
+              confirmPayment(props.user.paymentSecret, cardElement, document.getElementById('fname').value, document.getElementById('lname').value)
               }}>
               Pay $5.00
             </Button>

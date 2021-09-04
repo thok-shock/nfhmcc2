@@ -6,10 +6,13 @@ import './index.css'
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import LandingPage from './Landing/LandingPage';
 import InternalRouter from './Internal/InternalRouter';
+import { ToastContainer } from 'react-toastify';
 
     ReactDOM.render(
         <div>
+            
         <Router>
+        
             <Switch>
                 <Route path='/' exact>
                     <LandingPage></LandingPage>
@@ -18,7 +21,9 @@ import InternalRouter from './Internal/InternalRouter';
                     <InternalRouter />
                 </Route>
             </Switch>
+            
         </Router>
+        
         </div>
     ,
       document.getElementById('root')
