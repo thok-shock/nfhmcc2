@@ -46,6 +46,9 @@ passport.use(new GoogleStrategy({
  
 const app = express()
 
+//pass webhook requests (these are received from Stripe)
+app.use('/webhook', webhookRouter)
+
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({}))
 
@@ -84,8 +87,7 @@ app.get('/', (req, res) => {
 //pass api requests
 app.use('/api', apiRouter)
 
-//pass webhook requests (these are received from Stripe)
-app.use('/webhook', webhookRouter)
+
 
 //all internal requests must be authenticated
 app.get('/internal', (req, res) => {
